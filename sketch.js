@@ -33,7 +33,6 @@
  }
 // A sound file object
 let song;
-
 let words = '';
 
 function preload() {
