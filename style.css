@@ -12,15 +12,27 @@ canvas {
 }
 
 #text {
+  
   position: fixed;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  direction: ltr;
   top: 20px;
-  left: 20px;
+  left: 30px;
   z-index: 9999;
   pointer-events: none;
   color: white;
   font-family: 'Doto', sans-serif;  
   font-weight: 400;
-  font-size: 24px;
+  font-size: 30px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+#textInner, 
+.blinking-cursor {
+  white-space: pre-wrap;
 }
 
 #text.hidden {

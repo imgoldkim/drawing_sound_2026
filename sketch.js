@@ -14,21 +14,25 @@
  let isTypingMode = false;
  let titleText = 'Drawing Sound';
 
+
  function mousePressed() {
    userStartAudio();
 
    if (isPlaying) {
      song.pause();
-     
+     robot.cancel();
      
      isPlaying = false;
-isTypingMode = false;
+     isTypingMode = false;
 
-  document.body.classList.remove('writing-active');
-  document.body.classList.remove('no-cursor');
-
-     
-    
+    document.body.classList.remove('writing-active');
+    document.body.classList.remove('no-cursor');
+   
+    words = '';
+    typedHistory = '';
+    document.getElementById('textInner').textContent = '';
+        
+        
 
   } else {
      song.loop();
@@ -45,6 +49,7 @@ isTypingMode = false;
 // A sound file object
 let song;
 let words = '';
+let typedHistory = '';
 
 function preload() {
   // Load a sound file
@@ -211,6 +216,7 @@ function pressAKey(event) {
   if (event.key === 'Enter') {
     if (words.trim() !== '') {
       robot.speak(words);
+      typedHistory += words + '\n';
       words = '';
     }
   } else if (event.key === 'Backspace') {
@@ -219,7 +225,8 @@ function pressAKey(event) {
     words += event.key;
   }
 
-  document.getElementById('textInner').textContent = words;
+  document.getElementById('textInner').textContent =
+    typedHistory + words;
 }
 
 window.addEventListener('keydown', pressAKey);
