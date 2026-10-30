@@ -10,3 +10,41 @@ canvas {
   
   cursor: none;
 }
+
+#text {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  pointer-events: none;
+  color: white;
+  font-family: 'Doto', sans-serif;  
+  font-weight: 400;
+  font-size: 24px;
+}
+
+#text.hidden {
+  opacity: 0;
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.blinking-cursor {
+  display: none;
+  animation: 1s blink step-end infinite;
+}
+  body.writing-active .blinking-cursor {
+  display: inline;
+  -webkit-animation: 1s blink step-end infinite;
+  -moz-animation: 1s blink step-end infinite;
+  -ms-animation: 1s blink step-end infinite;
+  -o-animation: 1s blink step-end infinite;
+  animation: 1s blink step-end infinite;
+}

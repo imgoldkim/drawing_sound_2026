@@ -11,6 +11,8 @@
  * a sound file, and a running <a href="https://github.com/processing/p5.js/wiki/Local-server">local server</a>.</span></em></p>
  */
  let isPlaying = false;
+ let isTypingMode = false;
+ let titleText = 'Drawing Sound';
 
  function mousePressed() {
    userStartAudio();
@@ -20,15 +22,24 @@
      
      
      isPlaying = false;
-   
-     document.body.classList.remove('no-cursor');
-   } else {
+isTypingMode = false;
+
+  document.body.classList.remove('writing-active');
+  document.body.classList.remove('no-cursor');
+
+     
+    
+
+  } else {
      song.loop();
      loop();
      isPlaying = true;
-     document.body.classList.add('no-cursor');
-   }
-   
+     isTypingMode = true;
+
+    document.body.classList.add('writing-active');
+    document.body.classList.add('no-cursor');
+     
+    }
    
  }
 // A sound file object
@@ -42,7 +53,7 @@ function preload() {
 }
 
 let font;
-let points = [];
+let points = []; //drawing sound
 let bounds;
 
 
@@ -63,11 +74,12 @@ function setup() {
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  
 }
 
 function draw() {
   
-
+  let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
   let hue = map(mouseX, 0, width, 0, 360);
   let bright = map(mouseY, 0, height, 20, 60);
   background(hue, 250, bright, 0.02);
@@ -85,85 +97,140 @@ noStroke();
       ellipse(posX, posY, i, i);
     } 
     
-    
-    
-    let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
+  let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
 
-    stroke(hue, 0, 100, textAlpha);
-    strokeWeight(2);
-    
-    push();
+  let drawingBounds = font.textBounds('Drawing Sound', 0, 0, 60);
 
-    let textX = 0;
-    let textY = 150;
-
-    translate(
-    width / 2 - (bounds.x + bounds.w / 2) + textX,
-    height / 2 - (bounds.y + bounds.h / 2) + textY
-);
-
-    for (let p of points) {
-      point(p.x, p.y);
-    }
-    pop();
-    
-    
+  let titleX = width / 2 - drawingBounds.w / 2;
+  let titleY = height / 2 + 156 - drawingBounds.h / 2;
 
 
-    return;  
+  let titleText = 'Drawing Sound';
+  let titleBounds = font.textBounds(titleText, 0, 0, 60);
+  let titlePoints = font.textToPoints(
+    titleText,
+    0,
+    0,
+    60,
+    { sampleFactor: 0.25 }
+  );
 
+  stroke(hue, 0, 100, textAlpha);
+  strokeWeight(2);
 
+  push();
 
-  
+  translate(
+    width / 2 - (titleBounds.x + titleBounds.w / 2),
+    height / 2 + 156 - (titleBounds.y + titleBounds.h / 2)
+  );
+
+  for (let p of titlePoints) {
+    point(p.x, p.y);
   }
+  pop();
+  return;
+}
 
-  // Set the volume to a range between 0 and 1.0
-  let volume = map(mouseX, 0, width, 0, 1);
-  volume = constrain(volume, 0, 1);
-  song.amp(volume);
+// Set the volume to a range between 0 and 1.0
+let volume = map(mouseX, 0, width, 0, 1);
+volume = constrain(volume, 0, 1);
+song.amp(volume);
 
-  // Set the rate to a range between 0.1 and 4
-  // Changing the rate alters the pitch
-  let speed = map(mouseY, 0.1, height, 0, 2);
-  speed = constrain(speed, 0.02, 4);
-  song.rate(speed);
+// Set the rate to a range between 0.1 and 4
+// Changing the rate alters the pitch
+let speed = map(mouseY, 0.1, height, 0, 2);
+speed = constrain(speed, 0.02, 4);
+song.rate(speed);
 
-  // circle following
-  posX = lerp(posX, mouseX, 0.1);
-  posY = lerp(posY, mouseY, 0.1);
+// circle following
+posX = lerp(posX, mouseX, 0.1);
+posY = lerp(posY, mouseY, 0.1);
 
-  // blur
-  noStroke();
-   let maxSize = 142;
-  for (let i = maxSize; i > 0; i -= 5) {
-    let alpha = map(i, 0, maxSize, 0.5, 0);  
-    fill((hue + 180) % 360, 80, 100, alpha);
-    ellipse(posX, posY, i, i);
-  }
+// blur
+noStroke();
+  let maxSize = 142;
+for (let i = maxSize; i > 0; i -= 5) {
+  let alpha = map(i, 0, maxSize, 0.5, 0);  
+  fill((hue + 180) % 360, 80, 100, alpha);
+  ellipse(posX, posY, i, i);
+}
 
+  // when it plays cursor appears
+// let typingSize = 40;
+// let typingX = 30;
+// let typingY =80;
+
+// if (words.length > 0) {
+//   let typingBounds = font.textBounds(words, 0, 0, typingSize);
+//   let typingPoints = font.textToPoints(
+//     words,
+//     0,
+//     0,
+//     typingSize,
+//     { sampleFactor: 0.25 }
+//   );
+
+//   stroke(0, 0, 100, 1);
+//   strokeWeight(2);
+
+//   push();
+
+//   translate(
+//     typingX - typingBounds.x,
+//     typingY - (typingBounds.y + typingBounds.h / 2)
+//   );
+
+//   for (let p of typingPoints) {
+//     point(p.x, p.y);
+//   }
+
+//   pop();
+
+//   typingX += typingBounds.w + 10;
+// }
+
+// if (frameCount % 20 < 10) {
+//   stroke(0, 0, 100, 1);
+//   strokeWeight(2);
+//   line(typingX, typingY - 25, typingX, typingY + 25);
+// }
 
   
 }
 
 let robot = new p5.Speech();
 
-
 function pressAKey(event) {
-  
-robot.setVoice("Google UK English Female")
-  let letter = event.key;
-  if (letter == 'Enter') {
-    // let utterance = new SpeechSynthesisUtterance(words);
-    // speechSynthesis.speak(utterance);
-    robot.speak(words)
-    words = '';
-  } else {
-    words += letter; 
+  if (!isPlaying) {
+    return;
   }
-  print(words)
-   // let utterance = new SpeechSynthesisUtterance("hi guys welcome to my world");
+
+  robot.setVoice('Google UK English Female');
+
+  if (event.key === 'Enter') {
+    if (words.trim() !== '') {
+      robot.speak(words);
+      words = '';
+    }
+  } else if (event.key === 'Backspace') {
+    words = words.slice(0, -1);
+  } else if (event.key.length === 1) {
+    words += event.key;
+  }
+
+  document.getElementById('textInner').textContent = words;
 }
 
-window.addEventListener('keydown', pressAKey)
+window.addEventListener('keydown', pressAKey);
 
+// const toggleTypingMode = () => {
+//   isTypingMode = !isTypingMode;
+//   if (!isTypingMode) {
+//     document.getElementById('textInner').classList.add('hidden');
+//   } else {
+//     document.getElementById('textInner').classList.remove('hidden');
+//   }
+// };
 
+// window.addEventListener('click', toggleTypingMode);
