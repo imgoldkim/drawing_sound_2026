@@ -38,7 +38,13 @@ let words = '';
 function preload() {
   // Load a sound file
   song = loadSound('assets/part.mp3');
+  font = loadFont('Righteous-Regular.ttf');
 }
+
+let font;
+let points = [];
+let bounds;
+
 
 
 let posX = 0;
@@ -50,7 +56,13 @@ function setup() {
   background(335, 100, 20);
   posX = width / 2 ;
   posY = height / 2;
-  
+
+  textFont(font);
+  bounds = font.textBounds('Drawing Sound', 0, 0, 60);
+  points = font.textToPoints('Drawing Sound', 0, 0, 60, {sampleFactor: 0.25});
+}
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
@@ -75,16 +87,29 @@ noStroke();
     
     
     
-    let textAlpha = map(sin(frameCount * 0.84), -1, 1, 0.3, 4);
-    fill(hue, 0, 100, textAlpha);
-    textAlign(CENTER, CENTER);
-    textSize(16);
-    textFont('Righteous')
-    text('Drawing Sound', width / 2, height / 2 +110);
+    let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
 
-  
-
+    stroke(hue, 0, 100, textAlpha);
+    strokeWeight(2);
     
+    push();
+
+    let textX = 0;
+    let textY = 150;
+
+    translate(
+    width / 2 - (bounds.x + bounds.w / 2) + textX,
+    height / 2 - (bounds.y + bounds.h / 2) + textY
+);
+
+    for (let p of points) {
+      point(p.x, p.y);
+    }
+    pop();
+    
+    
+
+
     return;  
 
 
