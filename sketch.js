@@ -76,7 +76,7 @@ function draw() {
     posX = lerp(posX, width / 2, 0.15);
     posY = lerp(posY, height / 2, 0.15);
 
-  let maxSize = map(sin(frameCount * 6.55), -1, 180, 150, 130);
+  let maxSize = map(sin(frameCount * 6.55), -1, 180, 160, 140);
 
 noStroke();
     for (let i = maxSize; i > 0; i -= 4) {
@@ -134,8 +134,8 @@ noStroke();
 
   // blur
   noStroke();
-   let maxSize = 105;
-  for (let i = maxSize; i > 0; i -= 4) {
+   let maxSize = 142;
+  for (let i = maxSize; i > 0; i -= 5) {
     let alpha = map(i, 0, maxSize, 0.5, 0);  
     fill((hue + 180) % 360, 80, 100, alpha);
     ellipse(posX, posY, i, i);
