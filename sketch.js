@@ -13,43 +13,109 @@
  let isPlaying = false;
  let isTypingMode = false;
  let titleText = 'Drawing Sound';
+ let hiddenInput;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let wasPlayingAtTouchStart = false;
+  let touchWasOnText = false;
+  let touchInProgress = false;
 
+function touchStarted() {
+  touchInProgress = true;
+  wasPlayingAtTouchStart = isPlaying;
 
- function mousePressed() {
-   userStartAudio();
+  if (touches.length > 0) {
+    mouseX = touches[0].x;
+    mouseY = touches[0].y;
+    touchStartX = mouseX;
+    touchStartY = mouseY;
+  }
 
-   if (isPlaying) {
-     song.pause();
-     robot.cancel();
-     
-     isPlaying = false;
-     isTypingMode = false;
+  touchStartTime = millis();
+
+ if (!isPlaying) {
+  togglePlayback();
+}
+
+  return false;
+}
+
+async function togglePlayback() {
+  if (isPlaying) {
+    song.pause();
+    robot.cancel();
+
+    isPlaying = false;
+    isTypingMode = false;
+    words = '';
+    typedHistory = '';
 
     document.body.classList.remove('writing-active');
     document.body.classList.remove('no-cursor');
-   
-    words = '';
-    typedHistory = '';
     document.getElementById('textInner').textContent = '';
-        
-        
 
-  } else {
-     song.loop();
-     loop();
-     isPlaying = true;
-     isTypingMode = true;
+    return;
+  }
 
-    document.body.classList.add('writing-active');
-    document.body.classList.add('no-cursor');
-     
-    }
-   
- }
+  await userStartAudio();
+
+  song.loop();
+  isPlaying = true;
+  isTypingMode = true;
+
+  document.body.classList.add('writing-active');
+  document.body.classList.add('no-cursor');
+}
+
+
+
+function touchMoved() {
+  if (touches.length > 0) {
+    mouseX = touches[0].x;
+    mouseY = touches[0].y;
+  }
+
+  return false;
+}
+
+function touchEnded() {
+  const distance = dist(
+    touchStartX,
+    touchStartY,
+    mouseX,
+    mouseY
+  );
+
+  const duration = millis() - touchStartTime;
+
+  if (
+    wasPlayingAtTouchStart &&
+    !touchWasOnText &&
+    duration < 250 &&
+    distance < 15
+  ) {
+    togglePlayback();
+  }
+
+  touchInProgress = false;
+  return false;
+}
+
+
+
+function mousePressed() {
+  if (touchInProgress) return;
+
+  togglePlayback();
+}
+
+ 
 // A sound file object
 let song;
 let words = '';
 let typedHistory = '';
+
 
 function preload() {
   // Load a sound file
@@ -79,21 +145,43 @@ function setup() {
 }
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  
 }
+  
 
 function draw() {
-  
+  const isMobile =
+  'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  const mobileScale = isMobile ? 2.2 : 1;
+  const titleOffsetY = isMobile ? 125 : 0;
+  const titleSize = isMobile ? 80 : 60;
+
   let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
   let hue = map(mouseX, 0, width, 0, 360);
-  let bright = map(mouseY, 0, height, 20, 60);
-  background(hue, 250, bright, 0.02);
-  
+  let bright = map(mouseY, 0, height, 20, 60);  const pageColor = color(hue, 100, bright, 1);
+
+  background(hue, 100, bright, 0.02);
+
+  if (frameCount % 5 === 0) {
+    const pixel = drawingContext.getImageData(0, 0, 1, 1).data;
+
+    document.documentElement.style.setProperty(
+      '--page-color',
+      `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`
+    );
+  }
+    
   if(!isPlaying) {
     posX = lerp(posX, width / 2, 0.15);
     posY = lerp(posY, height / 2, 0.15);
 
-  let maxSize = map(sin(frameCount * 6.55), -1, 180, 160, 140);
+  let maxSize = map(
+  sin(frameCount * 6.55),
+  -1,
+  180,
+  160,
+  140
+) * mobileScale;
 
 noStroke();
     for (let i = maxSize; i > 0; i -= 4) {
@@ -104,21 +192,29 @@ noStroke();
     
   let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
 
-  let drawingBounds = font.textBounds('Drawing Sound', 0, 0, 60);
+  let drawingBounds = font.textBounds(
+  'Drawing Sound',
+  0,
+  0,
+  titleSize
+);
 
-  let titleX = width / 2 - drawingBounds.w / 2;
-  let titleY = height / 2 + 156 - drawingBounds.h / 2;
+let titleText = 'Drawing Sound';
 
+let titleBounds = font.textBounds(
+  titleText,
+  0,
+  0,
+  titleSize
+);
 
-  let titleText = 'Drawing Sound';
-  let titleBounds = font.textBounds(titleText, 0, 0, 60);
-  let titlePoints = font.textToPoints(
-    titleText,
-    0,
-    0,
-    60,
-    { sampleFactor: 0.25 }
-  );
+let titlePoints = font.textToPoints(
+  titleText,
+  0,
+  0,
+  titleSize,
+  { sampleFactor: 0.25 }
+);
 
   stroke(hue, 0, 100, textAlpha);
   strokeWeight(2);
@@ -126,9 +222,9 @@ noStroke();
   push();
 
   translate(
-    width / 2 - (titleBounds.x + titleBounds.w / 2),
-    height / 2 + 156 - (titleBounds.y + titleBounds.h / 2)
-  );
+  width / 2 - (titleBounds.x + titleBounds.w / 2),
+  height / 2 + 156 - (titleBounds.y + titleBounds.h / 2) + titleOffsetY
+);
 
   for (let p of titlePoints) {
     point(p.x, p.y);
@@ -142,8 +238,7 @@ let volume = map(mouseX, 0, width, 0, 1);
 volume = constrain(volume, 0, 1);
 song.amp(volume);
 
-// Set the rate to a range between 0.1 and 4
-// Changing the rate alters the pitch
+
 let speed = map(mouseY, 0.1, height, 0, 2);
 speed = constrain(speed, 0.02, 4);
 song.rate(speed);
@@ -154,52 +249,14 @@ posY = lerp(posY, mouseY, 0.1);
 
 // blur
 noStroke();
-  let maxSize = 142;
+  let maxSize = 142 * mobileScale;
 for (let i = maxSize; i > 0; i -= 5) {
   let alpha = map(i, 0, maxSize, 0.5, 0);  
   fill((hue + 180) % 360, 80, 100, alpha);
   ellipse(posX, posY, i, i);
 }
 
-  // when it plays cursor appears
-// let typingSize = 40;
-// let typingX = 30;
-// let typingY =80;
 
-// if (words.length > 0) {
-//   let typingBounds = font.textBounds(words, 0, 0, typingSize);
-//   let typingPoints = font.textToPoints(
-//     words,
-//     0,
-//     0,
-//     typingSize,
-//     { sampleFactor: 0.25 }
-//   );
-
-//   stroke(0, 0, 100, 1);
-//   strokeWeight(2);
-
-//   push();
-
-//   translate(
-//     typingX - typingBounds.x,
-//     typingY - (typingBounds.y + typingBounds.h / 2)
-//   );
-
-//   for (let p of typingPoints) {
-//     point(p.x, p.y);
-//   }
-
-//   pop();
-
-//   typingX += typingBounds.w + 10;
-// }
-
-// if (frameCount % 20 < 10) {
-//   stroke(0, 0, 100, 1);
-//   strokeWeight(2);
-//   line(typingX, typingY - 25, typingX, typingY + 25);
-// }
 
   
 }
@@ -231,13 +288,3 @@ function pressAKey(event) {
 
 window.addEventListener('keydown', pressAKey);
 
-// const toggleTypingMode = () => {
-//   isTypingMode = !isTypingMode;
-//   if (!isTypingMode) {
-//     document.getElementById('textInner').classList.add('hidden');
-//   } else {
-//     document.getElementById('textInner').classList.remove('hidden');
-//   }
-// };
-
-// window.addEventListener('click', toggleTypingMode);
