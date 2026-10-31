@@ -14,13 +14,14 @@
  let isTypingMode = false;
  let titleText = 'Drawing Sound';
  let hiddenInput;
-let touchStartX = 0;
-let touchStartY = 0;
-let touchStartTime = 0;
-let wasPlayingAtTouchStart = false;
-let touchWasOnText = false;
-let touchInProgress = false;
-let ignoreNextMousePress = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let wasPlayingAtTouchStart = false;
+  let touchWasOnText = false;
+  let touchInProgress = false;
+  let ignoreNextMousePress = false;
+  let lastTouchEndTime = 0;
 
 function touchStarted() {
   touchInProgress = true;
@@ -95,7 +96,7 @@ function touchEnded() {
     togglePlayback();
   }
 
-  ignoreNextMousePress = true;
+  lastTouchEndTime = millis();
   touchInProgress = false;
   return false;
 }
@@ -103,8 +104,8 @@ function touchEnded() {
 
 
 function mousePressed() {
-  if (ignoreNextMousePress) {
-    ignoreNextMousePress = false;
+  // 모바일 터치 직후 발생하는 가상 mousePressed만 무시
+  if (millis() - lastTouchEndTime < 500) {
     return;
   }
 
