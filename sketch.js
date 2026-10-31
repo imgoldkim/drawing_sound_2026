@@ -152,9 +152,9 @@ function draw() {
   const isMobile =
   'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-  const mobileScale = isMobile ? 2.2 : 1;
-  const titleOffsetY = isMobile ? 125 : 0;
-  const titleSize = isMobile ? 80 : 60;
+  const mobileScale = isMobile ? 1.1 : 1;
+  const titleOffsetY = isMobile ? -5 : 0;
+  const titleSize = isMobile ? 35 : 60;
 
   let textAlpha = map(sin(frameCount * 0.05), -1, 1, 0.3, 1);
   let hue = map(mouseX, 0, width, 0, 360);
@@ -208,16 +208,20 @@ let titleBounds = font.textBounds(
   titleSize
 );
 
+const pointDensity = isMobile ? 0.3 : 0.25;
+
 let titlePoints = font.textToPoints(
   titleText,
   0,
   0,
   titleSize,
-  { sampleFactor: 0.25 }
+  { sampleFactor: pointDensity }
 );
 
   stroke(hue, 0, 100, textAlpha);
-  strokeWeight(2);
+
+const titleStrokeWeight = isMobile ? 1.2 : 1.5;
+  strokeWeight(titleStrokeWeight);
 
   push();
 
