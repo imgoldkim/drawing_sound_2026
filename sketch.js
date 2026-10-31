@@ -35,10 +35,6 @@ function touchStarted() {
 
   touchStartTime = millis();
 
- if (!isPlaying) {
-  togglePlayback();
-}
-
   return false;
 }
 
@@ -91,7 +87,7 @@ function touchEnded() {
   const duration = millis() - touchStartTime;
 
   if (
-    wasPlayingAtTouchStart &&
+   
     !touchWasOnText &&
     duration < 250 &&
     distance < 15
