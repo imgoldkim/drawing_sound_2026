@@ -14,12 +14,13 @@
  let isTypingMode = false;
  let titleText = 'Drawing Sound';
  let hiddenInput;
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchStartTime = 0;
-  let wasPlayingAtTouchStart = false;
-  let touchWasOnText = false;
-  let touchInProgress = false;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let wasPlayingAtTouchStart = false;
+let touchWasOnText = false;
+let touchInProgress = false;
+let ignoreNextMousePress = false;
 
 function touchStarted() {
   touchInProgress = true;
@@ -98,6 +99,7 @@ function touchEnded() {
     togglePlayback();
   }
 
+  ignoreNextMousePress = true;
   touchInProgress = false;
   return false;
 }
@@ -105,6 +107,11 @@ function touchEnded() {
 
 
 function mousePressed() {
+  if (ignoreNextMousePress) {
+    ignoreNextMousePress = false;
+    return;
+  }
+
   if (touchInProgress) return;
 
   togglePlayback();
